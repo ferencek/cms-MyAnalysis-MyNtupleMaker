@@ -25,6 +25,13 @@ options.register('outputFilename',
     VarParsing.varType.string,
     "Name of the output file"
 )
+
+options.register('reportEvery',
+    10,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.int,
+    "Report every N events (default is N=10)"
+)
 ## 'maxEvents' is already registered by the Framework, changing default value
 options.setDefault('maxEvents', 10)
 
@@ -46,7 +53,7 @@ removeAllPATObjectsBut(process, ['Jets', 'Muons'])
 ############## IMPORTANT ########################################
 # If you run over many samples and you save the log, remember to reduce
 # the size of the output by prescaling the report of the event number
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = options.reportEvery
 process.MessageLogger.cerr.default.limit = 10
 #################################################################
 
@@ -187,6 +194,14 @@ process.primaryVertexFilter = cms.EDFilter("GoodVertexFilter",
   maxd0            = cms.double  (2.0),
 )
 
+# Removal of beam scraping events
+process.scrapingVeto = cms.EDFilter("FilterOutScraping",
+  applyfilter = cms.untracked.bool  (False),
+  debugOn     = cms.untracked.bool  (False),
+  numtrack    = cms.untracked.uint32(10),
+  thresh      = cms.untracked.double(0.25)
+)
+
 ## Event counters
 process.nEventsTotal = cms.EDProducer("EventCountProducer")
 
@@ -194,6 +209,7 @@ process.nEventsTotal = cms.EDProducer("EventCountProducer")
 process.p = cms.Path(
     process.nEventsTotal*
     process.primaryVertexFilter*
+    process.scrapingVeto*
     process.HBHENoiseFilterResultProducer*
     #process.kt6PFJets* # added automatically by PAT when L1FastJet is used
     process.kt6PFJetsForIsolation*
