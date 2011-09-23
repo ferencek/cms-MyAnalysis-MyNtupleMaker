@@ -13,7 +13,7 @@ class MyNtupleMaker_GenEventInfo : public edm::EDProducer {
 
  private:
   void produce( edm::Event &, const edm::EventSetup &);
-  const edm::InputTag   genEvtInfoInputTag;
+  const edm::InputTag   genEvtInfoInputTag, puInfoInputTag;
 };
 
 #endif
