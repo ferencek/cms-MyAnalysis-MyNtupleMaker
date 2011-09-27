@@ -61,12 +61,6 @@ process.MessageLogger.cerr.default.limit = 10
 inputJetCorrLevelsCalo = cms.vstring(['L1Offset', 'L2Relative', 'L3Absolute'])
 inputJetCorrLevelsPF   = cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute'])
 
-if options.runOnData:
-    ## Turn off MC matching for the process
-    removeMCMatching(process, ['All'], '', False)
-    inputJetCorrLevelsCalo = cms.vstring(['L1Offset', 'L2Relative', 'L3Absolute', 'L2L3Residual'])
-    inputJetCorrLevelsPF   = cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual'])
-
 ## Load MyNtupleMaker modules
 process.load('MyAnalysis.MyNtupleMaker.MyNtupleMaker_cff')
 
@@ -87,7 +81,15 @@ process.options.wantSummary = cms.untracked.bool(True)
 process.source.fileNames = [
     '/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/02719D6B-1398-E011-AA71-001A92971B94.root'
 ]
+
+## If running on data
 if options.runOnData:
+    ## Turn off MC matching for the process
+    removeMCMatching(process, ['All'], '', False)
+
+    inputJetCorrLevelsCalo = cms.vstring(['L1Offset', 'L2Relative', 'L3Absolute', 'L2L3Residual'])
+    inputJetCorrLevelsPF   = cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual'])
+ 
     process.source.fileNames = [
         '/store/data/Run2011A/Jet/AOD/May10ReReco-v1/0000/94A6E942-447C-E011-8F5F-0024E8768D68.root'
     ]
