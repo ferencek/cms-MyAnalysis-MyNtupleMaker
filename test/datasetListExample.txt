@@ -1,0 +1,3 @@
+# Dataset_name                                                                 Number_of_lumis   Number_of_jobs   Scheduler             DBS_instance     Publication_name   Run_selection   PyCfg_parameters (optional)
+/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM                    -1              400      condor   cms_dbs_ph_analysis_01   EDMTuple_V00-00-01               -   globalTag=START42_V13::All
+/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM                -1             4000      condor   cms_dbs_ph_analysis_02   EDMTuple_V00-00-01             1-1   globalTag=START42_V13::All outputFilename=EDMTuple.root
