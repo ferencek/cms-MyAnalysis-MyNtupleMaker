@@ -179,10 +179,11 @@ MyNtupleMaker_EventSelection::produce(edm::Event& iEvent, const edm::EventSetup&
      
         *passEcalMaskedCellDRFilter.get() = !(*ecalMaskedCellDRFilterResult);
     }
-    else
-    {
-        edm::LogError("MyNtupleMaker_EventSelection") << "Error! Can't get the product " << ecalMaskedCellDRFilterInputTag;
-    }
+    // LogError call has to be commented out due to a bug/feature in the simpleDRfilter
+//     else
+//     {
+//         edm::LogError("MyNtupleMaker_EventSelection") << "Error! Can't get the product " << ecalMaskedCellDRFilterInputTag;
+//     }
 
     if(caloBoundaryDRFilterResult.isValid())
     {
@@ -190,10 +191,11 @@ MyNtupleMaker_EventSelection::produce(edm::Event& iEvent, const edm::EventSetup&
      
         *passCaloBoundaryDRFilter.get() = !(*caloBoundaryDRFilterResult);
     }
-    else
-    {
-        edm::LogError("MyNtupleMaker_EventSelection") << "Error! Can't get the product " << caloBoundaryDRFilterInputTag;
-    }
+    // LogError call has to be commented out due to a bug/feature in the simpleDRfilter
+//     else
+//     {
+//         edm::LogError("MyNtupleMaker_EventSelection") << "Error! Can't get the product " << caloBoundaryDRFilterInputTag;
+//     }
 
     //-----------------------------------------------------------------
     // put products in the event
