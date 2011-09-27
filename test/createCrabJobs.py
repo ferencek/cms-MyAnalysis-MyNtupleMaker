@@ -84,6 +84,7 @@ def main():
     crab_cfg_content = re.sub('TOTAL_LUMIS',line_elements[1],crab_cfg_content)
     crab_cfg_content = re.sub('N_JOBS',line_elements[2],crab_cfg_content)
     crab_cfg_content = re.sub('WORKING_DIR',os.path.join(main_workdir,line_elements[0].lstrip('/').replace('/','__')),crab_cfg_content)
+    crab_cfg_content = re.sub('DBS_INSTANCE',line_elements[4],crab_cfg_content)
     crab_cfg_content = re.sub('PUBLICATION_NAME',line_elements[0].lstrip('/').split('/')[1] + '_' + line_elements[5] + (('_' + line_elements[6]) if line_elements[6] != '-' else ''),crab_cfg_content)
     if( len(line_elements)>7 ):
       cfg_parameters = line_elements[7]
