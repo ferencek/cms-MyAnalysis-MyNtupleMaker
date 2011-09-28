@@ -27,6 +27,10 @@ def main():
                     help="CRAB configuration file template",
                     metavar="CRAB_CFG_TEMPLATE")
 
+  parser.add_option("-l", "--lumi_mask", dest="lumi_mask",
+                    help="Lumi mask file that defines which runs and lumis to process (This parameter is optional)",
+                    metavar="LUMI_MASK")
+
   parser.add_option("-n", "--no_creation",
                     action="store_true", dest="no_creation", default=False,
                     help="Create the necessary configuration files and skip the job creation (This parameter is optional)")
@@ -42,6 +46,9 @@ def main():
   dataset_list = options.dataset_list
   cmssw_cfg = options.cmssw_cfg
   crab_cfg_template = options.crab_cfg_template
+  lumi_mask = ''
+  if options.lumi_mask:
+    lumi_mask = options.lumi_mask
 
   # redefine main_workdir as an absolute path (if not defined in such form already)
   if not re.search("^/", main_workdir):
@@ -60,6 +67,10 @@ def main():
   # copy the CMSSW cfg file to the cfg_files_dir
   shutil.copyfile(cmssw_cfg,os.path.join(cfg_files_dir,'CMSSW_cfg.py'))
 
+  if options.lumi_mask:
+    # copy the lumi mask file to the cfg_files_dir
+    shutil.copyfile(lumi_mask,os.path.join(cfg_files_dir,'lumi_mask.txt'))
+
   # read the CRAB cfg template
   crab_cfg_template_file = open(crab_cfg_template,'r')
   crab_cfg_template_content = crab_cfg_template_file.read()
@@ -74,25 +85,30 @@ def main():
     if (len(line_elements)==0 or line_elements[0][0]=='#'): continue
 
     crab_cfg_content = crab_cfg_template_content
-    crab_cfg_content = re.sub('SCHEDULER',line_elements[3],crab_cfg_content)
+    crab_cfg_content = re.sub('SCHEDULER',line_elements[4],crab_cfg_content)
+    crab_cfg_content = re.sub('USE_SERVER',line_elements[5],crab_cfg_content)
     crab_cfg_content = re.sub('DATASET_NAME',line_elements[0],crab_cfg_content)
     crab_cfg_content = re.sub('CFG_FILE',os.path.join(cfg_files_dir,'CMSSW_cfg.py'),crab_cfg_content)
-    if(line_elements[6] != '-'):
-      crab_cfg_content = re.sub('RUN_SELECTION',line_elements[6],crab_cfg_content)
+    if(line_elements[3] != '-'):
+      crab_cfg_content = re.sub('RUN_SELECTION',line_elements[3],crab_cfg_content)
     else:
       crab_cfg_content = re.sub('runselection','#runselection',crab_cfg_content)
+    if options.lumi_mask:
+      crab_cfg_content = re.sub('LUMI_MASK',os.path.join(cfg_files_dir,'lumi_mask.txt'),crab_cfg_content)
+    else:
+      crab_cfg_content = re.sub('lumi_mask','#lumi_mask',crab_cfg_content)
     crab_cfg_content = re.sub('TOTAL_LUMIS',line_elements[1],crab_cfg_content)
     crab_cfg_content = re.sub('N_JOBS',line_elements[2],crab_cfg_content)
-    crab_cfg_content = re.sub('WORKING_DIR',os.path.join(main_workdir,line_elements[0].lstrip('/').replace('/','__')),crab_cfg_content)
-    crab_cfg_content = re.sub('DBS_INSTANCE',line_elements[4],crab_cfg_content)
-    crab_cfg_content = re.sub('PUBLICATION_NAME',line_elements[0].lstrip('/').split('/')[1] + '_' + line_elements[5] + (('_' + line_elements[6]) if line_elements[6] != '-' else ''),crab_cfg_content)
-    if( len(line_elements)>7 ):
-      cfg_parameters = line_elements[7]
-      for param in range(8,len(line_elements)):
+    if( len(line_elements)>8 ):
+      cfg_parameters = line_elements[8]
+      for param in range(9,len(line_elements)):
         cfg_parameters = cfg_parameters + ' ' + line_elements[param]
       crab_cfg_content = re.sub('CFG_PARAMETERS',cfg_parameters,crab_cfg_content)
     else:
       crab_cfg_content = re.sub('CFG_PARAMETERS','noprint',crab_cfg_content)
+    crab_cfg_content = re.sub('WORKING_DIR',os.path.join(main_workdir,line_elements[0].lstrip('/').replace('/','__')),crab_cfg_content)
+    crab_cfg_content = re.sub('PUBLICATION_NAME',line_elements[0].lstrip('/').split('/')[1] + '_' + line_elements[7] + (('_' + line_elements[3]) if line_elements[3] != '-' else ''),crab_cfg_content)
+    crab_cfg_content = re.sub('DBS_INSTANCE',line_elements[6],crab_cfg_content)
 
     # create a CRAB cfg file
     crab_cfg_name = os.path.join(cfg_files_dir,line_elements[0].lstrip('/').replace('/','__') + '_crab.cfg')
