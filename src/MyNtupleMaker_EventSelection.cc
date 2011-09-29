@@ -47,7 +47,7 @@ MyNtupleMaker_EventSelection::produce(edm::Event& iEvent, const edm::EventSetup&
     std::auto_ptr<bool> passCaloBoundaryDRFilter ( new bool() ) ;
 
     *passPrimaryVertex.get() = false;
-    *passBeamScraping.get() = false;
+    *passBeamScraping.get() = true;
     *passHBHENoiseFilter.get() = true;
     *passBeamHaloFilterLoose.get() = true;
     *passBeamHaloFilterTight.get() = true;
@@ -95,7 +95,7 @@ MyNtupleMaker_EventSelection::produce(edm::Event& iEvent, const edm::EventSetup&
                 if( it->quality(trackQuality) ) nHighPurity++;
             }
             fraction = (double)nHighPurity/(double)tracks->size();
-            if( fraction > hpTracksThreshold ) *passBeamScraping.get() = true;
+            if( fraction < hpTracksThreshold ) *passBeamScraping.get() = false;
         }
     }
     else
