@@ -70,7 +70,7 @@ def main():
     elif(options.report):
       os.system('crab -status -c ' + workdir)
       os.system('crab -report -c ' + workdir)
-    elif(options.getoutput):
+    elif(options.publish):
       os.system('crab -publish -c ' + workdir)
     elif(options.kill):
       print 'You are about to kill all jobs for dataset ' + line_elements[0] + '. Are you sure you want to proceed? [Yes/No]'
