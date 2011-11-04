@@ -13,7 +13,7 @@ options.register('runOnData',
 )
 
 options.register('globalTag',
-    'START42_V13::All',
+    'START42_V14B::All',
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
     "Global tag to be used"
@@ -48,7 +48,7 @@ from PhysicsTools.PatAlgos.patTemplate_cfg import *
 from PhysicsTools.PatAlgos.tools.coreTools import *
 
 ## Remove certain objects from the default sequence
-removeAllPATObjectsBut(process, ['Jets', 'Muons'])
+removeAllPATObjectsBut(process, ['Jets', 'Muons', 'METs'])
 
 ############## IMPORTANT ########################################
 # If you run over many samples and you save the log, remember to reduce
@@ -93,6 +93,20 @@ if options.runOnData:
     process.source.fileNames = [
         '/store/data/Run2011A/Jet/AOD/May10ReReco-v1/0000/94A6E942-447C-E011-8F5F-0024E8768D68.root'
     ]
+    ## Get new calibration for the jet probability b-tagger (already included in START42_V14B::All hence only needed for data)
+    ## The following modifications are based on https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagJetProbabilityCalibration#Use_the_new_calibration_in_42x_r
+    process.GlobalTag.toGet = cms.VPSet(
+        cms.PSet(
+            record = cms.string("BTagTrackProbability2DRcd"),
+            tag = cms.string("TrackProbabilityCalibration_2D_2011Data_v1_offline"),
+            connect = cms.untracked.string("frontier://FrontierProd/CMS_COND_31X_BTAU")
+        ),
+        cms.PSet(
+            record = cms.string("BTagTrackProbability3DRcd"),
+            tag = cms.string("TrackProbabilityCalibration_3D_2011Data_v1_offline"),
+            connect = cms.untracked.string("frontier://FrontierProd/CMS_COND_31X_BTAU")
+        )
+    )
 
 ## For L1FastJet Corrections ( https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections )
 ##-------------------- Import the Jet RECO modules -----------------------
@@ -168,6 +182,10 @@ process.AK5CaloJets.ReadJECUncertainty = True
 process.AK7PFJets.ReadJECUncertainty   = True
 process.AK7CaloJets.ReadJECUncertainty = True
 
+## Add PFMET
+from PhysicsTools.PatAlgos.tools.metTools import *
+addPfMET(process, 'PF')
+
 ## Load HBHENoiseFilterResultProducer
 process.load('CommonTools/RecoAlgos/HBHENoiseFilterResultProducer_cfi')
 # Check the latest recommendation from https://twiki.cern.ch/twiki/bin/view/CMS/HBHEAnomalousSignals2011
@@ -193,20 +211,31 @@ process.simpleDRfilter.metInputTag = cms.InputTag("pfMet")
 process.simpleDRfilter.doFilter = cms.untracked.bool(False) # to enable filter
 process.simpleDRfilter.makeProfileRoot = False
 
-# Good vertex selection
+## Good vertex selection
 process.primaryVertexFilter = cms.EDFilter("GoodVertexFilter",
   vertexCollection = cms.InputTag('offlinePrimaryVertices'),
-  minimumNDOF      = cms.uint32  (4),
+  minimumNDOF      = cms.uint32  (4), # this is > 4
   maxAbsZ          = cms.double  (24.0),
   maxd0            = cms.double  (2.0),
 )
 
-# Removal of beam scraping events
+## Removal of beam scraping events
 process.scrapingVeto = cms.EDFilter("FilterOutScraping",
-  applyfilter = cms.untracked.bool  (False),
+  applyfilter = cms.untracked.bool  (True),
   debugOn     = cms.untracked.bool  (False),
   numtrack    = cms.untracked.uint32(10),
   thresh      = cms.untracked.double(0.25)
+)
+
+## Produce a collection of good primary vertices
+from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
+process.goodOfflinePrimaryVertices = cms.EDFilter("PrimaryVertexObjectFilter",
+    filterParams = pvSelector.clone(
+        minNdof = cms.double(4.0), # this is >= 4
+        maxZ = cms.double(24.0),
+        maxRho = cms.double(2.0)
+    ),
+    src = cms.InputTag('offlinePrimaryVertices')
 )
 
 ## Event counters
@@ -217,12 +246,15 @@ process.p = cms.Path(
     process.nEventsTotal*
     process.primaryVertexFilter*
     process.scrapingVeto*
-    process.HBHENoiseFilterResultProducer*
-    #process.kt6PFJets* # added automatically by PAT when L1FastJet is used
-    process.kt6PFJetsForIsolation*
-    process.ak5PFJets*
-    process.ak7PFJets*
-    process.simpleDRfilter*
+    (
+    process.goodOfflinePrimaryVertices+
+    process.HBHENoiseFilterResultProducer+
+    #process.kt6PFJets+ # added automatically by PAT when L1FastJet is used
+    process.kt6PFJetsForIsolation+
+    process.ak5PFJets+
+    process.ak7PFJets+
+    process.simpleDRfilter
+    )*
     process.patDefaultSequence*
     (
     process.AK5CaloJets+
@@ -231,10 +263,12 @@ process.p = cms.Path(
     process.AK7GenJets+
     process.AK5PFJets+
     process.AK7PFJets+
+    process.CaloMET+
     process.EventSelection+
     process.GenEventInfo+
     process.GenParticles+
     process.Muons+
+    process.PFMET+
     process.Vertices
     )
 )
@@ -260,10 +294,12 @@ process.output = cms.OutputModule("PoolOutputModule",
         'keep *_AK7GenJets_*_*',
         'keep *_AK5PFJets_*_*',
         'keep *_AK7PFJets_*_*',
+        'keep *_CaloMET_*_*',
         'keep *_EventSelection_*_*',
         'keep *_GenEventInfo_*_*',
         'keep *_GenParticles_*_*',
         'keep *_Muons_*_*',
+        'keep *_PFMET_*_*',
         'keep *_Vertices_*_*'
     )
 )
