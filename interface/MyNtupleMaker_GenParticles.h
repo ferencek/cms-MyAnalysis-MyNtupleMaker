@@ -13,9 +13,10 @@ class MyNtupleMaker_GenParticles : public edm::EDProducer {
 
  private:
   void produce( edm::Event &, const edm::EventSetup &);
-  const edm::InputTag   inputTag;
-  const std::string     prefix, suffix;
-  const int             maxSize;
+  const edm::InputTag    inputTag;
+  const std::string      prefix, suffix;
+  const int              maxSize;
+  const std::vector<int> pdgIdsOfInterest;
 };
 
 #endif

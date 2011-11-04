@@ -7,7 +7,8 @@ MyNtupleMaker_GenParticles::MyNtupleMaker_GenParticles(const edm::ParameterSet& 
   inputTag(iConfig.getParameter<edm::InputTag>("InputTag")),
   prefix  (iConfig.getParameter<std::string>  ("Prefix")),
   suffix  (iConfig.getParameter<std::string>  ("Suffix")),
-  maxSize (iConfig.getParameter<int> ("MaxSize"))
+  maxSize (iConfig.getParameter<int> ("MaxSize")),
+  pdgIdsOfInterest (iConfig.getParameter<std::vector<int> > ("PdgIDsOfInterest"))
   
 {
     produces <std::vector<double> > ( prefix + "Eta" + suffix );
@@ -52,9 +53,18 @@ MyNtupleMaker_GenParticles::produce(edm::Event& iEvent, const edm::EventSetup& i
 
             for( reco::GenParticleCollection::const_iterator it = genParticles->begin(); it != genParticles->end(); ++it )
             {
-                // exit from loop when you reach the required number of GenParticles
-                if( maxSize > 0 && eta->size() >= (unsigned int) maxSize )
+                bool isOfInterest = false;
+                for( std::vector<int>::const_iterator itPdgID = pdgIdsOfInterest.begin(); itPdgID != pdgIdsOfInterest.end(); ++itPdgID )
+                {
+                  if( abs(*itPdgID) == abs(it->pdgId()) )
+                  {
+                    isOfInterest = true;
                     break;
+                  }
+                }
+                // exit from loop when you reach the required number of GenParticles (unless the GenParticle has a PDG ID of interest)
+                if( maxSize > 0 && eta->size() >= (unsigned int) maxSize && !isOfInterest )
+                    continue;
 
                 // fill in all the vectors
                 eta->push_back( it->eta() );
