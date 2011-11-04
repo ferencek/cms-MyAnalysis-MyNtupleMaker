@@ -126,8 +126,8 @@ MyNtupleMaker_EventSelection::produce(edm::Event& iEvent, const edm::EventSetup&
     {
         edm::LogInfo("MyNtupleMaker_EventSelection") << "Successfully obtained " << beamHaloInputTag;
 
-        *passBeamHaloFilterLoose.get() = beamHaloSummary->CSCLooseHaloId();
-        *passBeamHaloFilterTight.get() = beamHaloSummary->CSCTightHaloId();
+        *passBeamHaloFilterLoose.get() = !beamHaloSummary->CSCLooseHaloId();
+        *passBeamHaloFilterTight.get() = !beamHaloSummary->CSCTightHaloId();
     }
     else
     {
