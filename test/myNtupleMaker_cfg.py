@@ -85,7 +85,7 @@ process.source.fileNames = [
 ## If running on data
 if options.runOnData:
     ## Turn off MC matching for the process
-    removeMCMatching(process, ['All'], '', False)
+    removeMCMatching(process, ['All'])
 
     inputJetCorrLevelsCalo = cms.vstring(['L1Offset', 'L2Relative', 'L3Absolute', 'L2L3Residual'])
     inputJetCorrLevelsPF   = cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual'])
@@ -274,7 +274,7 @@ process.p = cms.Path(
 )
 
 ## Output file
-process.output = cms.OutputModule("PoolOutputModule",
+process.out = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string(options.outputFilename),
     # save only events passing the full path
     SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
@@ -305,12 +305,8 @@ process.output = cms.OutputModule("PoolOutputModule",
     )
 )
 
-## Delete predefined output module and Endpath (needed for running with CRAB)
-del process.out
-del process.outpath
-
 ## EndPath definition
-process.outpath = cms.EndPath(process.output)
+process.outpath = cms.EndPath(process.out)
 
 ## Schedule definition
 process.schedule = cms.Schedule(process.p)
