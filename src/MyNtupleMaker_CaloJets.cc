@@ -145,7 +145,7 @@ MyNtupleMaker_CaloJets::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
             if(readJECUncertainty)
             {
-                jecUnc->setJetEta( it->eta() );
+                jecUnc->setJetEta( fabs(it->eta()) >= 5.5 ? 5.499 : it->eta() ); // the uncertainty is only defined for |eta| up to 5.5
                 jecUnc->setJetPt( it->pt() ); // the uncertainty is a function of the corrected pt
             }
 

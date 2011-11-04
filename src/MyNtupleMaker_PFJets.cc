@@ -185,7 +185,7 @@ MyNtupleMaker_PFJets::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
             if(readJECUncertainty)
             {
-                jecUnc->setJetEta( it->eta() );
+                jecUnc->setJetEta( fabs(it->eta()) >= 5.5 ? 5.499 : it->eta() );
                 jecUnc->setJetPt( it->pt() ); // the uncertainty is a function of the corrected pt
             }
 
