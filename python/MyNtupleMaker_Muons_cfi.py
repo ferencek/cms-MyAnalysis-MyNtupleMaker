@@ -5,5 +5,5 @@ Muons = cms.EDProducer("MyNtupleMaker_Muons",
     Prefix = cms.string(''),
     Suffix = cms.string(''),
     MaxSize = cms.int32(-1), # turned off if negative
-    VertexInputTag = cms.InputTag('offlinePrimaryVertices')
+    VertexInputTag = cms.InputTag('goodOfflinePrimaryVertices')
 )

@@ -17,5 +17,5 @@ AK7CaloJets = cms.EDProducer("MyNtupleMaker_CaloJets",
     MaxSize = cms.int32(-1), # turned off if negative
     JECUncertainty = cms.string('AK7Calo'),
     ReadJECUncertainty = cms.bool(True),
-    VertexInputTag = cms.InputTag('offlinePrimaryVertices')
+    VertexInputTag = cms.InputTag('goodOfflinePrimaryVertices')
 )
