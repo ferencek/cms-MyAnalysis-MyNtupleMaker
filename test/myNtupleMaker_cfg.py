@@ -66,9 +66,6 @@ process.load('MyAnalysis.MyNtupleMaker.MyNtupleMaker_cff')
 
 ## Make sure a correct global tag is used (please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions#Valid_Global_Tags_by_Release)
 process.GlobalTag.globaltag = options.globalTag
-#process.GlobalTag.globaltag = 'START42_V13::All' # ===> First complete JEC set for 42x 2011 data (https://indico.cern.ch/getFile.py/access?contribId=8&resId=0&materialId=slides&confId=143981)
-#process.GlobalTag.globaltag = 'START42_V12::All' # ===> for Summer11 MC analyzed in 42X (contains Jec11_V1, does not contain "residual" JEC and uncertainties yet...)
-#process.GlobalTag.globaltag = 'START41_V0::All' # ===> for 41X MC analyzed in 41X (contains Jec10V3)
 
 ## Events to process
 process.maxEvents.input = options.maxEvents
@@ -176,15 +173,15 @@ process.selectedPatJetsAK5PF.cut   = 'pt > 10.0'
 process.selectedPatJetsAK7Calo.cut = 'pt > 10.0'
 process.selectedPatJetsAK7PF.cut   = 'pt > 10.0'
 
-## Read JEC uncertainties (might not be available in some global tag)
+## Add PFMET
+from PhysicsTools.PatAlgos.tools.metTools import *
+addPfMET(process, 'PF')
+
+## Read JEC uncertainties (might not be available in some global tags)
 process.AK5PFJets.ReadJECUncertainty   = True
 process.AK5CaloJets.ReadJECUncertainty = True
 process.AK7PFJets.ReadJECUncertainty   = True
 process.AK7CaloJets.ReadJECUncertainty = True
-
-## Add PFMET
-from PhysicsTools.PatAlgos.tools.metTools import *
-addPfMET(process, 'PF')
 
 ## Load HBHENoiseFilterResultProducer
 process.load('CommonTools/RecoAlgos/HBHENoiseFilterResultProducer_cfi')
@@ -249,7 +246,6 @@ process.p = cms.Path(
     (
     process.goodOfflinePrimaryVertices+
     process.HBHENoiseFilterResultProducer+
-    #process.kt6PFJets+ # added automatically by PAT when L1FastJet is used
     process.kt6PFJetsForIsolation+
     process.ak5PFJets+
     process.ak7PFJets+
@@ -287,7 +283,7 @@ process.out = cms.OutputModule("PoolOutputModule",
         'drop *_TriggerResults_*_PAT',
         'keep *_hltTriggerSummaryAOD_*_*',
         'keep *_nEventsTotal_*_*',
-        'keep *_kt6PFJets_rho_*',
+        'keep *_kt6PFJetsAK5PF_rho_*',
         'keep *_kt6PFJetsForIsolation_rho_*',
         'keep *_AK5CaloJets_*_*',
         'keep *_AK7CaloJets_*_*',
