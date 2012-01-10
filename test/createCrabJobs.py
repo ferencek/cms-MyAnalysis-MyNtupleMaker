@@ -31,6 +31,10 @@ def main():
                     help="Lumi mask file that defines which runs and lumis to process (This parameter is optional)",
                     metavar="LUMI_MASK")
 
+  parser.add_option("-f", "--cut_file", dest="cut_file",
+                    help="Cut file (This parameter is optional)",
+                    metavar="CUT_FILE")
+
   parser.add_option("-n", "--no_creation",
                     action="store_true", dest="no_creation", default=False,
                     help="Create the necessary configuration files and skip the job creation (This parameter is optional)")
@@ -46,9 +50,6 @@ def main():
   dataset_list = options.dataset_list
   cmssw_cfg = options.cmssw_cfg
   crab_cfg_template = options.crab_cfg_template
-  lumi_mask = ''
-  if options.lumi_mask:
-    lumi_mask = options.lumi_mask
 
   # redefine main_workdir as an absolute path (if not defined in such form already)
   if not re.search("^/", main_workdir):
@@ -69,8 +70,12 @@ def main():
 
   if options.lumi_mask:
     # copy the lumi mask file to the cfg_files_dir
-    shutil.copyfile(lumi_mask,os.path.join(cfg_files_dir,'lumi_mask.txt'))
+    shutil.copyfile(options.lumi_mask,os.path.join(cfg_files_dir,'lumi_mask.txt'))
 
+  if options.cut_file:
+    # copy the cut file to the cfg_files_dir
+    shutil.copyfile(options.cut_file,os.path.join(cfg_files_dir,'cutFile.txt'))
+    
   # read the CRAB cfg template
   crab_cfg_template_file = open(crab_cfg_template,'r')
   crab_cfg_template_content = crab_cfg_template_file.read()
@@ -106,6 +111,10 @@ def main():
       crab_cfg_content = re.sub('CFG_PARAMETERS',cfg_parameters,crab_cfg_content)
     else:
       crab_cfg_content = re.sub('CFG_PARAMETERS','noprint',crab_cfg_content)
+    if options.cut_file:
+      crab_cfg_content = re.sub('INPUT_FILES',os.path.join(cfg_files_dir,'cutFile.txt'),crab_cfg_content)
+    else:
+      crab_cfg_content = re.sub('additional_input_files','#additional_input_files',crab_cfg_content)
     crab_cfg_content = re.sub('WORKING_DIR',os.path.join(main_workdir,line_elements[0].lstrip('/').replace('/','__')),crab_cfg_content)
     crab_cfg_content = re.sub('PUBLICATION_NAME',line_elements[0].lstrip('/').split('/')[1] + '_' + line_elements[7] + (('_' + line_elements[3]) if line_elements[3] != '-' else ''),crab_cfg_content)
     crab_cfg_content = re.sub('DBS_INSTANCE',line_elements[6],crab_cfg_content)
